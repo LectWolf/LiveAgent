@@ -36,6 +36,9 @@ type browserConn struct {
 	// idPrefix + 原始 request_id 构成转发给桌面端的关联 id；回程剥离。
 	idPrefix string
 
+	// scopedAgentID 非空时，该浏览器连接只能操作这一台电脑（手机用 Agent 标识登录）。
+	scopedAgentID string
+
 	terminalInterest *shared.TerminalInterestTracker
 
 	// dispatchLimiter 限制在途派发数（慢请求 goroutine 上限）；rateLimiter 限制
@@ -206,6 +209,7 @@ func (c *browserConn) handshake() bool {
 		return false
 	}
 
+	c.scopedAgentID = verdict.scopedAgentID
 	c.core.SetAuthorized()
 	// 握手前的读超时刻意未刷新；成功后立即续期。
 	c.core.TouchInboundActivity()
@@ -285,11 +289,22 @@ func (c *browserConn) dispatch(frame *gatewayv2.WebClientFrame) {
 }
 
 func (c *browserConn) requireAgentID(requestID, agentID string) bool {
-	if agentID != "" {
+	if agentID == "" {
+		_ = c.sendLocalError(requestID, "agent_id is required")
+		return false
+	}
+	if !c.allowsAgent(agentID) {
+		_ = c.sendLocalError(requestID, "unauthorized")
+		return false
+	}
+	return true
+}
+
+func (c *browserConn) allowsAgent(agentID string) bool {
+	if c.scopedAgentID == "" {
 		return true
 	}
-	_ = c.sendLocalError(requestID, "agent_id is required")
-	return false
+	return strings.TrimSpace(agentID) == c.scopedAgentID
 }
 
 // send 编码并投递一帧（拥塞策略由帧类别声明，wscore 统一执行）。

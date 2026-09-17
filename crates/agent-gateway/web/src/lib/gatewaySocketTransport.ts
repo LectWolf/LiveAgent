@@ -14,6 +14,7 @@ import type {
 } from "@liveagent/ui/lib/workspace-activity/types";
 import { ConversationStreamClient } from "@/lib/chat/stream/conversationStreamClient";
 import { normalizeActivityEvent, normalizeCommandUpdate } from "@/lib/chat/stream/streamTypes";
+import { looksLikeAgentID } from "@/lib/gatewayAuth";
 import { BrowserGatewayTerminalStreamClient } from "@/lib/terminal/gatewayTerminalStreamClient";
 import {
   applyTerminalSnapshotEvent,
@@ -139,7 +140,7 @@ export class GatewayWebSocketTransport {
   protected pendingAgentEvents = new Map<string, Array<{ type: string; payload: unknown }>>();
 
   constructor(protected readonly token: string) {
-    this.activeAgentId = loadPersistedActiveAgent();
+    this.activeAgentId = looksLikeAgentID(token) ? token.trim() : loadPersistedActiveAgent();
     this.terminalStream = new BrowserGatewayTerminalStreamClient(token, () => this.activeAgentId);
     this.installReconnectWakeups();
   }
@@ -151,6 +152,9 @@ export class GatewayWebSocketTransport {
   // setActiveAgent 只接受明确目标；切换后重连，以目标 Agent 的快照重画状态。
   setActiveAgent(agentId: string): void {
     const next = agentId.trim();
+    if (looksLikeAgentID(this.token) && next !== this.token.trim()) {
+      return;
+    }
     if (!next) {
       throw new Error("agent_id is required");
     }

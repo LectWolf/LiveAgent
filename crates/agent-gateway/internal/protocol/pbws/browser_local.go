@@ -56,6 +56,15 @@ func (c *browserConn) handleAgentList(requestID string) {
 			agents = append(agents, &gatewayv2.StatusEvent{AgentId: entry.AgentID, Name: entry.Name})
 		}
 	}
+	if c.scopedAgentID != "" {
+		filtered := agents[:0]
+		for _, agent := range agents {
+			if c.allowsAgent(agent.GetAgentId()) {
+				filtered = append(filtered, agent)
+			}
+		}
+		agents = filtered
+	}
 	sort.Slice(agents, func(i, j int) bool { return agents[i].GetAgentId() < agents[j].GetAgentId() })
 	_ = c.send(wscore.FrameResponse, "agent_list", &gatewayv2.WebServerFrame{
 		RequestId: requestID,

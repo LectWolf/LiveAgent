@@ -131,6 +131,19 @@ func NormalizeAgentID(raw string) (string, error) {
 	return agentID, nil
 }
 
+// IsRegistered 报告该 Agent 标识是否已在目录中（电脑用大门密码连上过后即登记）。
+func (s *Store) IsRegistered(agentID string) bool {
+	if s == nil {
+		return false
+	}
+	normalized, err := NormalizeAgentID(agentID)
+	if err != nil {
+		return false
+	}
+	_, ok := s.knownAgents.Load(normalized)
+	return ok
+}
+
 func normalizeName(raw string) (string, error) {
 	name := strings.TrimSpace(raw)
 	if utf8.RuneCountInString(name) > maxAgentNameLength {

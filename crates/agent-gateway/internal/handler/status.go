@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/liveagent/agent-gateway/internal/auth"
 	"github.com/liveagent/agent-gateway/internal/observability"
 	"github.com/liveagent/agent-gateway/internal/session"
 )
@@ -15,8 +16,18 @@ type statusResponse struct {
 
 func Status(sm *session.Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		agents := sm.AgentStatuses()
+		if principal, ok := auth.FromContext(r.Context()); ok && !principal.Admin {
+			filtered := agents[:0]
+			for _, agent := range agents {
+				if auth.AllowsAgent(principal, agent.AgentID) {
+					filtered = append(filtered, agent)
+				}
+			}
+			agents = filtered
+		}
 		writeJSON(w, http.StatusOK, statusResponse{
-			Agents:        sm.AgentStatuses(),
+			Agents:        agents,
 			ProtocolUsage: observability.Usage.Snapshot(),
 		})
 	}

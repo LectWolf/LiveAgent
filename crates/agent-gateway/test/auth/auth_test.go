@@ -12,7 +12,7 @@ func TestHTTPMiddlewareRequiresValidBearerToken(t *testing.T) {
 	t.Parallel()
 
 	var called bool
-	handler := auth.HTTPMiddleware(" secret-token\r\n", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	handler := auth.HTTPMiddleware(" secret-token\r\n", nil, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		called = true
 		w.WriteHeader(http.StatusNoContent)
 	}))

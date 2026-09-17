@@ -89,7 +89,7 @@ export function LoginPage({ token, error, isSubmitting, onTokenChange, onSubmit 
                 </div>
                 <h2 className="login-form-title">连接控制台</h2>
               </div>
-              <p className="login-form-sub">输入 Gateway 服务端的 Access Token 以验证身份</p>
+              <p className="login-form-sub">输入电脑「远程」设置里的 Agent 标识，即可只连接那一台</p>
             </div>
 
             <div className={cn("login-input-wrap", isFocused && "login-input-wrap--focus")}>

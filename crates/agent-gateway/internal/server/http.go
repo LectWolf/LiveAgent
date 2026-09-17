@@ -41,12 +41,12 @@ func NewHTTPServer(cfg *config.Config, sm *session.Manager, tokens *agenttoken.S
 	apiMux.HandleFunc("GET /api/status", handler.Status(sm))
 	apiMux.HandleFunc("POST /api/files/import", handler.ImportReadableFiles(sm, cfg.RequestTimeout))
 	apiMux.HandleFunc("POST /api/files/import-directory", handler.ImportDirectory(sm, cfg.RequestTimeout))
-	// Agent 目录与凭证管理，仅管理 token 可访问。
-	apiMux.HandleFunc("GET /api/agents", handler.ListAgents(sm, tokens))
-	apiMux.HandleFunc("POST /api/agents/{id}/token", handler.IssueAgentToken(sm, tokens))
-	apiMux.HandleFunc("PATCH /api/agents/{id}", handler.UpdateAgentName(tokens))
-	apiMux.HandleFunc("DELETE /api/agents/{id}", handler.DeleteAgent(sm, tokens))
-	rootMux.Handle("/api/", auth.HTTPMiddleware(cfg.Token, apiMux))
+	// Agent 目录与凭证管理，仅网关共享 Token 可访问。
+	apiMux.Handle("GET /api/agents", auth.RequireAdmin(handler.ListAgents(sm, tokens)))
+	apiMux.Handle("POST /api/agents/{id}/token", auth.RequireAdmin(handler.IssueAgentToken(sm, tokens)))
+	apiMux.Handle("PATCH /api/agents/{id}", auth.RequireAdmin(handler.UpdateAgentName(tokens)))
+	apiMux.Handle("DELETE /api/agents/{id}", auth.RequireAdmin(handler.DeleteAgent(sm, tokens)))
+	rootMux.Handle("/api/", auth.HTTPMiddleware(cfg.Token, tokens, apiMux))
 
 	webFS, err := fs.Sub(gateway.WebUIAssets, "web/dist")
 	if err != nil {

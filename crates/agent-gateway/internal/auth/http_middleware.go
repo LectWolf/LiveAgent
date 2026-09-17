@@ -6,31 +6,35 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+
+	"github.com/liveagent/agent-gateway/internal/auth/agenttoken"
 )
 
-func HTTPMiddleware(expectedToken string, next http.Handler) http.Handler {
+func HTTPMiddleware(expectedToken string, tokens *agenttoken.Store, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !ValidateBearerHeader(r.Header.Get("Authorization"), expectedToken) {
+		principal, ok := ResolveAccessToken(bearerToken(r.Header.Get("Authorization")), expectedToken, tokens)
+		if !ok {
 			writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 			return
 		}
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(WithPrincipal(r.Context(), principal)))
 	})
 }
 
-func ValidateBearerHeader(headerValue, expectedToken string) bool {
+func bearerToken(headerValue string) string {
 	headerValue = strings.TrimSpace(headerValue)
 	if headerValue == "" {
-		return false
+		return ""
 	}
 	parts := strings.SplitN(headerValue, " ", 2)
-	if len(parts) != 2 {
-		return false
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+		return ""
 	}
-	if !strings.EqualFold(parts[0], "Bearer") {
-		return false
-	}
-	return ValidateToken(parts[1], expectedToken)
+	return strings.TrimSpace(parts[1])
+}
+
+func ValidateBearerHeader(headerValue, expectedToken string) bool {
+	return ValidateToken(bearerToken(headerValue), expectedToken)
 }
 
 func ValidateToken(value, expectedToken string) bool {

@@ -12,14 +12,15 @@ import (
 
 // helloVerdict 是握手校验结果；ok=false 时 message 面向客户端。
 type helloVerdict struct {
-	ok      bool
-	message string
+	ok            bool
+	message       string
+	scopedAgentID string
 }
 
 // vetHello 校验 ClientHello 的协议版本、角色与浏览器凭证。
-// 角色-凭证绑定：浏览器角色只接受网关 token；Agent 角色必须声明 agent_id。
-// Agent 凭证由 authenticateAgentHello 在存储锁内只校验一次，主链路与终端
-// 数据链路复用该入口。凭证失败统一报 "unauthorized"，防止枚举 Agent ID。
+// 浏览器角色接受网关 token（可看全部电脑）或已登记的 Agent 标识（只锁定那一台）。
+// Agent 角色必须声明 agent_id。Agent 凭证由 authenticateAgentHello 校验。
+// 凭证失败统一报 "unauthorized"。
 func (s *Server) vetHello(hello *gatewayv2.ClientHello, wantRole gatewayv2.ClientRole) helloVerdict {
 	if hello == nil {
 		return helloVerdict{message: "hello frame is required"}
@@ -38,9 +39,11 @@ func (s *Server) vetHello(hello *gatewayv2.ClientHello, wantRole gatewayv2.Clien
 			return helloVerdict{message: "agent_id is required"}
 		}
 	default:
-		if !auth.ValidateToken(hello.GetToken(), s.cfg.Token) {
+		principal, ok := auth.ResolveAccessToken(hello.GetToken(), s.cfg.Token, s.tokens)
+		if !ok {
 			return helloVerdict{message: "unauthorized"}
 		}
+		return helloVerdict{ok: true, scopedAgentID: principal.AgentID}
 	}
 	return helloVerdict{ok: true}
 }

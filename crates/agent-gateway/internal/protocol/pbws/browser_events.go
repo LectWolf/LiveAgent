@@ -387,6 +387,9 @@ func forward[T any](
 				if !send {
 					continue
 				}
+				if !c.allowsAgent(frame.GetAgentId()) {
+					continue
+				}
 				if err := c.send(wscore.FrameData, kind, frame); err != nil {
 					if errors.Is(err, wscore.ErrWriteQueueFull) {
 						continue
@@ -403,6 +406,9 @@ func forward[T any](
 // 所有回放帧均携带明确来源，不再发送无标的单 Agent 兼容帧。
 func (c *browserConn) replaySnapshots() {
 	for _, agentID := range c.sm.ConnectedAgentIDs() {
+		if !c.allowsAgent(agentID) {
+			continue
+		}
 		view := c.sm.AgentView(agentID)
 		// 终端会话快照：以 created 事件逐条回放（按各 Agent 的门控独立判定）。
 		if shared.TerminalFeaturesEnabled(view) {
@@ -443,7 +449,7 @@ func (c *browserConn) replaySnapshots() {
 	// 每个已登记 Agent 回放自己的隧道快照并打标；离线 Agent 也保留其隧道目录。
 	for _, status := range c.sm.AgentStatuses() {
 		agentID := strings.TrimSpace(status.AgentID)
-		if agentID == "" {
+		if agentID == "" || !c.allowsAgent(agentID) {
 			continue
 		}
 		_ = c.send(wscore.FrameData, "tunnel_state", &gatewayv2.WebServerFrame{

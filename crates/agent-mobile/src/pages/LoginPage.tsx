@@ -102,7 +102,7 @@ export function LoginPage({
                 </div>
                 <h2 className="login-form-title">连接控制台</h2>
               </div>
-              <p className="login-form-sub">输入 Gateway 地址与 Access Token 以验证身份</p>
+              <p className="login-form-sub">输入 Gateway 地址，以及电脑「远程」设置里的 Agent 标识</p>
             </div>
 
             <div className={cn("login-input-wrap", isUrlFocused && "login-input-wrap--focus")}>

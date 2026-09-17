@@ -389,6 +389,31 @@ func TestAgentsAPIFiltersBeforeDatabasePaging(t *testing.T) {
 	}
 }
 
+func TestStatusAcceptsRegisteredAgentIDAndForbidsAdminAPI(t *testing.T) {
+	t.Parallel()
+
+	handler, _, store := newAgentsAPIServer(t)
+	agentID := testAgentID(21)
+	if err := store.Register(agentID); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+
+	status := doAgentsRequest(t, handler, http.MethodGet, "/api/status", agentID)
+	if status.Code != http.StatusOK {
+		t.Fatalf("agent-id status = %d body=%s", status.Code, status.Body.String())
+	}
+
+	unknown := doAgentsRequest(t, handler, http.MethodGet, "/api/status", testAgentID(22))
+	if unknown.Code != http.StatusUnauthorized {
+		t.Fatalf("unknown agent-id status = %d", unknown.Code)
+	}
+
+	list := doAgentsRequest(t, handler, http.MethodGet, "/api/agents", agentID)
+	if list.Code != http.StatusForbidden {
+		t.Fatalf("agent-id list status = %d, want forbidden", list.Code)
+	}
+}
+
 func leftPad(i int) string {
 	s := strconv.Itoa(i)
 	for len(s) < 3 {

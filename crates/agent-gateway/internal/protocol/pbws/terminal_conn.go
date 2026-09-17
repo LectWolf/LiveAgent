@@ -73,6 +73,15 @@ func (s *Server) serveTerminal(conn *websocket.Conn) {
 	}
 
 	boundAgentID := strings.TrimSpace(hello.GetAgentId())
+	if verdict.scopedAgentID != "" && verdict.scopedAgentID != boundAgentID {
+		_ = writeDirectMessage(conn, s.writeTimeout(), &gatewayv2.TerminalServerFrame{
+			Payload: &gatewayv2.TerminalServerFrame_Hello{
+				Hello: s.serverHello(false, "unauthorized", "", terminalBrowserReadLimit),
+			},
+		})
+		closeUnauthorized(conn, s.writeTimeout())
+		return
+	}
 	var (
 		authEpoch uint64
 		toAgent   chan *gatewayv2.TerminalStreamFrame

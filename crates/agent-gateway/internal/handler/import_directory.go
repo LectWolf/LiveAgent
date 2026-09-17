@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/liveagent/agent-gateway/internal/auth"
 	gatewayv2 "github.com/liveagent/agent-gateway/internal/proto/v2"
 	"github.com/liveagent/agent-gateway/internal/session"
 )
@@ -89,6 +90,10 @@ func ImportDirectory(
 		agentID := strings.TrimSpace(r.URL.Query().Get("agent_id"))
 		if agentID == "" {
 			writeError(w, http.StatusBadRequest, "agent_id is required")
+			return
+		}
+		if principal, ok := auth.FromContext(r.Context()); ok && !auth.AllowsAgent(principal, agentID) {
+			writeError(w, http.StatusForbidden, "forbidden")
 			return
 		}
 		if !sm.IsOnline(agentID) {
