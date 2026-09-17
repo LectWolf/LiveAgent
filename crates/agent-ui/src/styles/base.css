@@ -158,6 +158,17 @@
     @apply border-border;
   }
 
+  /*
+   * Safe-area tokens. iOS / Chrome / WebView 140+ populate env(); Android
+   * WebView < 140 reports 0, so the native shell overwrites these on <html>.
+   */
+  html {
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  }
+
   html,
   body,
   #root {

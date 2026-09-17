@@ -77,9 +77,9 @@ html[data-liveagent-webui="gateway"] .project-tools-panel-tabs-shell {
 
 html[data-liveagent-webui="gateway"] .project-file-tree-panel-scroll {
   padding-bottom: 16px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-bottom: max(16px, var(--safe-area-inset-bottom));
   scroll-padding-bottom: 16px;
-  scroll-padding-bottom: max(16px, env(safe-area-inset-bottom));
+  scroll-padding-bottom: max(16px, var(--safe-area-inset-bottom));
 }
 
 html[data-liveagent-webui="gateway"] .workdir-picker-tree {
@@ -584,11 +584,11 @@ html[data-liveagent-webui="gateway"] [role="textbox"]:focus-visible {
 /*
  * 聊天顶部栏避开系统状态栏（刘海/挖孔屏安全区）。移动端 WebView 采用
  * edge-to-edge 布局，ChatHeader 只有 py-2.5 的固定内边距，未叠加安全区时
- * 标题栏内容会与时间/电量重叠。底值 0.625rem 对应 ChatHeader 的 py-2.5，
- * 桌面窗口安全区为 0 时行为不变。
+ * 标题栏内容会与时间/电量重叠。0.625rem 对应 ChatHeader 的 py-2.5，叠在
+ * 安全区之上；安全区为 0 时与原来的 py-2.5 一致。
  */
 .gateway-chat-frame header[data-tauri-drag-region] {
-  padding-top: max(env(safe-area-inset-top, 0px), 0.625rem);
+  padding-top: calc(var(--safe-area-inset-top) + 0.625rem);
 }
 
 .history-share-frame {
@@ -2025,7 +2025,7 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
   .gateway-chat-frame {
     height: 100%;
     --gateway-chat-column-gutter: 12px;
-    --gateway-chat-composer-bottom: max(12px, env(safe-area-inset-bottom));
+    --gateway-chat-composer-bottom: max(12px, var(--safe-area-inset-bottom));
   }
 
   .history-share-header {
@@ -2334,7 +2334,7 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
     order: 1;
     border-top: 0;
     border-bottom: 1px solid hsl(var(--border) / 0.72);
-    padding: max(8px, env(safe-area-inset-top)) 10px 8px;
+    padding: calc(var(--safe-area-inset-top) + 8px) 10px 8px;
   }
 
   html[data-liveagent-webui="gateway"] .settings-back-button {
@@ -2391,7 +2391,7 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
     min-height: auto;
     flex: 0 0 auto;
     gap: 12px;
-    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    padding-bottom: max(14px, var(--safe-area-inset-bottom));
   }
 
   html[data-liveagent-webui="gateway"] .settings-memory-summary-card {
@@ -2506,7 +2506,7 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
 
   html[data-liveagent-webui="gateway"] .settings-modal-overlay {
     align-items: stretch;
-    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+    padding: calc(var(--safe-area-inset-top) + 8px) 8px calc(var(--safe-area-inset-bottom) + 8px);
   }
 
   html[data-liveagent-webui="gateway"] .settings-modal-panel {
@@ -2644,7 +2644,7 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
     min-height: 0;
     gap: 12px;
     overflow: visible;
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    padding-bottom: max(16px, var(--safe-area-inset-bottom));
   }
 
   html[data-liveagent-webui="gateway"] .settings-section-hero {
@@ -2827,8 +2827,8 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
        only if the card ever grows taller than the viewport, avoiding clipping. */
     padding: 24px 16px;
     align-content: safe center;
-    padding-top: max(env(safe-area-inset-top, 0px), 24px);
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+    padding-top: max(var(--safe-area-inset-top), 24px);
+    padding-bottom: max(var(--safe-area-inset-bottom), 24px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -2915,8 +2915,8 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
 @media (max-width: 640px) {
   .login-shell {
     padding: 10px;
-    padding-top: max(env(safe-area-inset-top, 0px), 16px);
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+    padding-top: max(var(--safe-area-inset-top), 16px);
+    padding-bottom: max(var(--safe-area-inset-bottom), 16px);
   }
 
   .login-container {
@@ -2984,7 +2984,7 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
 
   .gateway-chat-frame > header {
     gap: 6px;
-    padding: max(8px, env(safe-area-inset-top)) 10px 8px;
+    padding: calc(var(--safe-area-inset-top) + 8px) 10px 8px;
   }
 
   .gateway-banner-error {
@@ -3129,7 +3129,7 @@ html[data-liveagent-webui="gateway"] .project-terminal-viewport .xterm-scrollabl
     max-height: min(86dvh, 640px) !important;
     border-bottom: 0;
     border-radius: 20px 20px 0 0;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: var(--safe-area-inset-bottom);
     transition:
       opacity 200ms ease,
       transform 260ms cubic-bezier(0.32, 0.72, 0, 1);

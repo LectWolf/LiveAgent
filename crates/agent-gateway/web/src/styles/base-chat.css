@@ -77,9 +77,9 @@ html[data-liveagent-webui="gateway"] .project-tools-panel-tabs-shell {
 
 html[data-liveagent-webui="gateway"] .project-file-tree-panel-scroll {
   padding-bottom: 16px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-bottom: max(16px, var(--safe-area-inset-bottom));
   scroll-padding-bottom: 16px;
-  scroll-padding-bottom: max(16px, env(safe-area-inset-bottom));
+  scroll-padding-bottom: max(16px, var(--safe-area-inset-bottom));
 }
 
 html[data-liveagent-webui="gateway"] .workdir-picker-tree {

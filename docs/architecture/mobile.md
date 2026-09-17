@@ -9,6 +9,7 @@
 | 执行真相源 | 仍在桌面 GUI/Tauri；移动端不本地执行工具，也不持有本地文件系统权限。 |
 | 与 Gateway 的关系 | 与 WebUI 相同的 Gateway 客户端，走 `/ws/v2`（v2 WebSocket）与 `/api/*`。 |
 | Tauri 角色 | 提供 Android WebView 外壳；Rust 端是极简模板（`greet` + `opener` 插件），不承载业务命令。 |
+| 系统安全区 | `MainActivity` 保持 edge-to-edge，但用一层 host 把 WebView 垫进 `WindowInsets`（并消费 insets）。所有 `position:fixed; inset:0` / `100dvh` 界面（侧栏、文件预览、设置）都落在已避让的视口里，不按页面打 CSS 补丁。targetSdk 36 不能 opt-out。 |
 | 与桌面端的差异 | 复用 `@liveagent/ui` 共享 UI 与 `agent-ui-adapters`，但数据控制器、socket 客户端、shims 与 WebUI 对齐，而不是桌面端。 |
 
 ## 模块边界

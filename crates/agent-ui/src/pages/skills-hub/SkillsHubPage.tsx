@@ -1654,7 +1654,7 @@ export function SkillsHubPage(props: SkillsHubPageProps) {
                         className={cn(
                           "h-full min-h-0 overflow-y-auto px-0.5 pr-1 [overflow-anchor:none]",
                           bulkMode
-                            ? "pb-[calc(10rem+env(safe-area-inset-bottom))] sm:pb-24"
+                            ? "pb-[calc(10rem+var(--safe-area-inset-bottom))] sm:pb-24"
                             : "pb-4",
                         )}
                       >
@@ -1846,7 +1846,7 @@ export function SkillsHubPage(props: SkillsHubPageProps) {
       view === "installed" &&
       !lockedByChatMode &&
       (!bulkUndo || bulkSelection.size > 0) ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-3 max-sm:bottom-[calc(1rem+env(safe-area-inset-bottom))]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-3 max-sm:bottom-[calc(1rem+var(--safe-area-inset-bottom))]">
           <div
             role="toolbar"
             aria-label={t("settings.skillsBulkSelect")}
@@ -1949,7 +1949,7 @@ export function SkillsHubPage(props: SkillsHubPageProps) {
       ) : null}
 
       {bulkUndo && bulkSelection.size === 0 ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-3 max-sm:bottom-[calc(1rem+env(safe-area-inset-bottom))]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-3 max-sm:bottom-[calc(1rem+var(--safe-area-inset-bottom))]">
           <div className="hub-panel-enter pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-3 rounded-full border border-border/50 bg-background/95 py-2 pl-4 pr-2 text-[12.5px] shadow-[0_8px_24px_-12px_rgba(15,23,42,0.35)] dark:border-white/[0.1] dark:bg-popover/95">
             <span className="text-foreground">
               {t("settings.skillsBulkUpdated").replace("{count}", String(bulkUndo.count))}

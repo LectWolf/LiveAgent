@@ -435,7 +435,7 @@ export function WorkspaceProjectSettingsModal(props: {
               </main>
             </div>
 
-            <footer className="settings-modal-footer flex shrink-0 items-center justify-between gap-3 border-t bg-muted/20 px-5 py-3.5 max-[720px]:px-3.5 max-[720px]:pb-[calc(0.75rem+env(safe-area-inset-bottom))] max-[720px]:pt-3">
+            <footer className="settings-modal-footer flex shrink-0 items-center justify-between gap-3 border-t bg-muted/20 px-5 py-3.5 max-[720px]:px-3.5 max-[720px]:pb-[calc(0.75rem+var(--safe-area-inset-bottom))] max-[720px]:pt-3">
               <div
                 className={cn(
                   "min-w-0 truncate text-xs text-muted-foreground max-[520px]:hidden",

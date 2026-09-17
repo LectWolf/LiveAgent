@@ -154,7 +154,7 @@ export function SkillsImportView(props: {
       <div
         className={cn(
           "h-full min-h-0 overflow-y-auto px-1.5 pb-4 pt-1.5",
-          bulkMode ? "pb-[calc(5rem+env(safe-area-inset-bottom))] sm:pb-20" : null,
+          bulkMode ? "pb-[calc(5rem+var(--safe-area-inset-bottom))] sm:pb-20" : null,
         )}
       >
         {importToast ? (
@@ -496,7 +496,7 @@ export function SkillsImportView(props: {
       </div>
 
       {bulkMode ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-1 z-40 flex justify-center px-2 max-sm:bottom-[calc(0.25rem+env(safe-area-inset-bottom))]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-1 z-40 flex justify-center px-2 max-sm:bottom-[calc(0.25rem+var(--safe-area-inset-bottom))]">
           <div
             className={cn(
               "hub-panel-enter pointer-events-auto flex max-w-full flex-wrap items-center gap-2 rounded-full border border-border/50 bg-background/95 text-[12.5px] shadow-[0_8px_24px_-12px_rgba(15,23,42,0.35)] max-sm:justify-center max-sm:rounded-3xl max-sm:whitespace-nowrap dark:border-white/[0.1] dark:bg-popover/95",
