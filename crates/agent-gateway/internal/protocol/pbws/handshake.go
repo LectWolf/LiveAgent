@@ -18,8 +18,8 @@ type helloVerdict struct {
 }
 
 // vetHello 校验 ClientHello 的协议版本、角色与浏览器凭证。
-// 浏览器角色接受网关 token（可看全部电脑）或已登记的 Agent 标识（只锁定那一台）。
-// Agent 角色必须声明 agent_id。Agent 凭证由 authenticateAgentHello 校验。
+// 浏览器/手机控制台只接受已登记 Agent 标识，不接受网关共享 Token。
+// Agent 角色必须声明 agent_id。电脑接入仍可用共享 Token（authenticateAgentHello）。
 // 凭证失败统一报 "unauthorized"。
 func (s *Server) vetHello(hello *gatewayv2.ClientHello, wantRole gatewayv2.ClientRole) helloVerdict {
 	if hello == nil {
@@ -39,7 +39,7 @@ func (s *Server) vetHello(hello *gatewayv2.ClientHello, wantRole gatewayv2.Clien
 			return helloVerdict{message: "agent_id is required"}
 		}
 	default:
-		principal, ok := auth.ResolveAccessToken(hello.GetToken(), s.cfg.Token, s.tokens)
+		principal, ok := auth.ResolveClientAccessToken(hello.GetToken(), s.cfg.Token, s.tokens)
 		if !ok {
 			return helloVerdict{message: "unauthorized"}
 		}

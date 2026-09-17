@@ -1,7 +1,6 @@
 package httproutes_test
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -57,40 +56,18 @@ func TestHealthRouteIsPublic(t *testing.T) {
 	}
 }
 
-func TestStatusRouteReturnsAgentDirectory(t *testing.T) {
+func TestStatusRouteRejectsGatewayToken(t *testing.T) {
 	t.Parallel()
 
-	sm := session.NewManager()
-	sm.RecordAuthentication("desktop-agent", "0.9.0", "session-1")
-	sm.SetSession(session.NewAgentSession(sm.LatestAuthSnapshot("desktop-agent")))
-	handler := newHTTPTestHandler(sm)
+	handler := newHTTPTestHandler(session.NewManager())
 
 	req := httptest.NewRequest(http.MethodGet, "http://gateway.test/api/status", nil)
 	req.Header.Set("Authorization", " bearer   dev-token ")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
-	}
-
-	var payload struct {
-		Agents []struct {
-			Online       bool   `json:"online"`
-			AgentID      string `json:"agent_id"`
-			AgentVersion string `json:"agent_version"`
-			SessionID    string `json:"session_id"`
-		} `json:"agents"`
-	}
-	if err := json.NewDecoder(rec.Body).Decode(&payload); err != nil {
-		t.Fatalf("decode status payload: %v", err)
-	}
-	if len(payload.Agents) != 1 {
-		t.Fatalf("agents = %#v, want one entry", payload.Agents)
-	}
-	agent := payload.Agents[0]
-	if !agent.Online || agent.AgentID != "desktop-agent" || agent.AgentVersion != "0.9.0" || agent.SessionID != "session-1" {
-		t.Fatalf("agent = %#v, want authenticated session identity", agent)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("gateway token console login status = %d, want %d, body=%s", rec.Code, http.StatusUnauthorized, rec.Body.String())
 	}
 }
 

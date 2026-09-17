@@ -19,26 +19,37 @@ func TestHTTPMiddlewareRequiresValidBearerToken(t *testing.T) {
 
 	cases := []struct {
 		name          string
+		path          string
 		authorization string
 		wantStatus    int
 		wantCalled    bool
 	}{
 		{
 			name:       "missing header",
+			path:       "/api/status",
 			wantStatus: http.StatusUnauthorized,
 		},
 		{
 			name:          "wrong scheme",
+			path:          "/api/status",
 			authorization: "Token secret-token",
 			wantStatus:    http.StatusUnauthorized,
 		},
 		{
 			name:          "wrong token",
+			path:          "/api/status",
 			authorization: "Bearer wrong",
 			wantStatus:    http.StatusUnauthorized,
 		},
 		{
-			name:          "valid bearer token with whitespace",
+			name:          "gateway token cannot login console",
+			path:          "/api/status",
+			authorization: "  bearer   secret-token  ",
+			wantStatus:    http.StatusUnauthorized,
+		},
+		{
+			name:          "gateway token can access admin api",
+			path:          "/api/agents",
 			authorization: "  bearer   secret-token  ",
 			wantStatus:    http.StatusNoContent,
 			wantCalled:    true,
@@ -49,7 +60,7 @@ func TestHTTPMiddlewareRequiresValidBearerToken(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			called = false
-			req := httptest.NewRequest(http.MethodGet, "/api/status", nil)
+			req := httptest.NewRequest(http.MethodGet, tc.path, nil)
 			if tc.authorization != "" {
 				req.Header.Set("Authorization", tc.authorization)
 			}

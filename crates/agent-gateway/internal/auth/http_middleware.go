@@ -12,13 +12,28 @@ import (
 
 func HTTPMiddleware(expectedToken string, tokens *agenttoken.Store, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		principal, ok := ResolveAccessToken(bearerToken(r.Header.Get("Authorization")), expectedToken, tokens)
+		raw := bearerToken(r.Header.Get("Authorization"))
+		var principal Principal
+		var ok bool
+		if isAdminAPI(r.URL.Path) {
+			if !ValidateToken(raw, expectedToken) {
+				writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+				return
+			}
+			principal, ok = Principal{Admin: true}, true
+		} else {
+			principal, ok = ResolveClientAccessToken(raw, expectedToken, tokens)
+		}
 		if !ok {
 			writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 			return
 		}
 		next.ServeHTTP(w, r.WithContext(WithPrincipal(r.Context(), principal)))
 	})
+}
+
+func isAdminAPI(path string) bool {
+	return path == "/api/agents" || strings.HasPrefix(path, "/api/agents/")
 }
 
 func bearerToken(headerValue string) string {

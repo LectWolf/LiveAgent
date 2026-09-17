@@ -403,6 +403,11 @@ func TestStatusAcceptsRegisteredAgentIDAndForbidsAdminAPI(t *testing.T) {
 		t.Fatalf("agent-id status = %d body=%s", status.Code, status.Body.String())
 	}
 
+	gatewayLogin := doAgentsRequest(t, handler, http.MethodGet, "/api/status", "admin-token")
+	if gatewayLogin.Code != http.StatusUnauthorized {
+		t.Fatalf("gateway token console login status = %d, want unauthorized", gatewayLogin.Code)
+	}
+
 	unknown := doAgentsRequest(t, handler, http.MethodGet, "/api/status", testAgentID(22))
 	if unknown.Code != http.StatusUnauthorized {
 		t.Fatalf("unknown agent-id status = %d", unknown.Code)

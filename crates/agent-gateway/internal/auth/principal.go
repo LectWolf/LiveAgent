@@ -33,7 +33,7 @@ func AllowsAgent(principal Principal, agentID string) bool {
 	return principal.AgentID != "" && principal.AgentID == strings.TrimSpace(agentID)
 }
 
-// ResolveAccessToken 识别网关共享 Token，或已登记电脑的 Agent 标识。
+// ResolveAccessToken 识别网关共享 Token（仅管理面），或已登记电脑的 Agent 标识（控制台登录）。
 func ResolveAccessToken(rawToken, gatewayToken string, tokens *agenttoken.Store) (Principal, bool) {
 	rawToken = strings.TrimSpace(rawToken)
 	if rawToken == "" {
@@ -41,6 +41,18 @@ func ResolveAccessToken(rawToken, gatewayToken string, tokens *agenttoken.Store)
 	}
 	if ValidateToken(rawToken, gatewayToken) {
 		return Principal{Admin: true}, true
+	}
+	return ResolveClientAccessToken(rawToken, gatewayToken, tokens)
+}
+
+// ResolveClientAccessToken 只接受已登记 Agent 标识。网关共享 Token 不能登录控制台。
+func ResolveClientAccessToken(rawToken, gatewayToken string, tokens *agenttoken.Store) (Principal, bool) {
+	rawToken = strings.TrimSpace(rawToken)
+	if rawToken == "" {
+		return Principal{}, false
+	}
+	if ValidateToken(rawToken, gatewayToken) {
+		return Principal{}, false
 	}
 	agentID, err := agenttoken.NormalizeAgentID(rawToken)
 	if err != nil || !tokens.IsRegistered(agentID) {
